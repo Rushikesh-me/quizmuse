@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme - minimalistic like ChatGPT/Grok */
+    --background: #f9f9f8; /* platinum 900 */
+    --foreground: #0d1b2a; /* rich_black DEFAULT */
+    --card: #ffffff;
+    --card-foreground: #0d1b2a; /* rich_black DEFAULT */
+    --popover: #ffffff;
+    --popover-foreground: #0d1b2a; /* rich_black DEFAULT */
+    --primary: #1b263b; /* oxford_blue DEFAULT */
+    --primary-foreground: #f9f9f8; /* platinum 900 */
+    --secondary: #e3e8ee; /* silver_lake_blue 900 */
+    --secondary-foreground: #0d1b2a; /* rich_black DEFAULT */
+    --muted: #e3e8ee; /* silver_lake_blue 900 */
+    --muted-foreground: #415a77; /* yinmn_blue DEFAULT */
+    --accent: #415a77; /* yinmn_blue DEFAULT */
+    --accent-foreground: #f9f9f8; /* platinum 900 */
+    --destructive: #ef4444; /* red for warnings */
+    --destructive-foreground: #ffffff;
+    --border: #c8d1dc; /* silver_lake_blue 800 */
+    --input: #ffffff;
+    --ring: #415a77; /* yinmn_blue DEFAULT */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Dark theme - minimalistic like ChatGPT/Grok */
+    --background: #0d1b2a; /* rich_black DEFAULT */
+    --foreground: #f9f9f8; /* platinum 900 */
+    --card: #1b263b; /* oxford_blue DEFAULT */
+    --card-foreground: #f9f9f8; /* platinum 900 */
+    --popover: #0d1b2a; /* rich_black DEFAULT */
+    --popover-foreground: #f9f9f8; /* platinum 900 */
+    --primary: #f9f9f8; /* platinum 900 */
+    --primary-foreground: #0d1b2a; /* rich_black DEFAULT */
+    --secondary: #415a77; /* yinmn_blue DEFAULT */
+    --secondary-foreground: #f9f9f8; /* platinum 900 */
+    --muted: #415a77; /* yinmn_blue DEFAULT */
+    --muted-foreground: #c8d1dc; /* silver_lake_blue 800 */
+    --accent: #778da9; /* silver_lake_blue DEFAULT */
+    --accent-foreground: #0d1b2a; /* rich_black DEFAULT */
+    --destructive: #ef4444; /* red for warnings */
+    --destructive-foreground: #ffffff;
+    --border: #415a77; /* yinmn_blue DEFAULT */
+    --input: #1b263b; /* oxford_blue DEFAULT */
+    --ring: #778da9; /* silver_lake_blue DEFAULT */
+  }
+
+  /* Support for data-color-scheme attribute */
+  [data-color-scheme="light"] {
+    --background: #f9f9f8; /* platinum 900 */
+    --foreground: #0d1b2a; /* rich_black DEFAULT */
+    --card: #ffffff;
+    --card-foreground: #0d1b2a; /* rich_black DEFAULT */
+    --popover: #ffffff;
+    --popover-foreground: #0d1b2a; /* rich_black DEFAULT */
+    --primary: #1b263b; /* oxford_blue DEFAULT */
+    --primary-foreground: #f9f9f8; /* platinum 900 */
+    --secondary: #e3e8ee; /* silver_lake_blue 900 */
+    --secondary-foreground: #0d1b2a; /* rich_black DEFAULT */
+    --muted: #e3e8ee; /* silver_lake_blue 900 */
+    --muted-foreground: #415a77; /* yinmn_blue DEFAULT */
+    --accent: #415a77; /* yinmn_blue DEFAULT */
+    --accent-foreground: #f9f9f8; /* platinum 900 */
+    --destructive: #ef4444; /* red for warnings */
+    --destructive-foreground: #ffffff;
+    --border: #c8d1dc; /* silver_lake_blue 800 */
+    --input: #ffffff;
+    --ring: #415a77; /* yinmn_blue DEFAULT */
+  }
+
+  [data-color-scheme="dark"] {
+    --background: #0d1b2a; /* rich_black DEFAULT */
+    --foreground: #f9f9f8; /* platinum 900 */
+    --card: #1b263b; /* oxford_blue DEFAULT */
+    --card-foreground: #f9f9f8; /* platinum 900 */
+    --popover: #0d1b2a; /* rich_black DEFAULT */
+    --popover-foreground: #f9f9f8; /* platinum 900 */
+    --primary: #f9f9f8; /* platinum 900 */
+    --primary-foreground: #0d1b2a; /* rich_black DEFAULT */
+    --secondary: #415a77; /* yinmn_blue DEFAULT */
+    --secondary-foreground: #f9f9f8; /* platinum 900 */
+    --muted: #415a77; /* yinmn_blue DEFAULT */
+    --muted-foreground: #c8d1dc; /* silver_lake_blue 800 */
+    --accent: #778da9; /* silver_lake_blue DEFAULT */
+    --accent-foreground: #0d1b2a; /* rich_black DEFAULT */
+    --destructive: #ef4444; /* red for warnings */
+    --destructive-foreground: #ffffff;
+    --border: #415a77; /* yinmn_blue DEFAULT */
+    --input: #1b263b; /* oxford_blue DEFAULT */
+    --ring: #778da9; /* silver_lake_blue DEFAULT */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .loading-spinner {
+    @apply inline-block animate-spin;
+  }
+
+  .loading-spinner svg {
+    @apply block;
+  }
+}
