@@ -1,10 +1,9 @@
 services:
   - type: web
     name: quizmuse
-    env: node
+    env: docker
     plan: free
-    buildCommand: cd backend && yarn install --frozen-lockfile && yarn build
-    startCommand: cd backend && npx @langchain/langgraph-cli up --no-docker
+    dockerfilePath: backend/Dockerfile
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
