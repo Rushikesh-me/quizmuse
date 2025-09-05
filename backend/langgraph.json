@@ -9,7 +9,5 @@
     "env": ".env",
     "dependencies":["."],
     "host": "0.0.0.0",
-    "port": 2024,
-    "docker": false,
-    "noDocker": true
+    "port": 2024
   }
