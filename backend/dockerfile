@@ -1,10 +1,8 @@
-# Use Node.js 20 as specified in langgraph.json
 FROM node:20-slim
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies for PDF processing and other requirements
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
@@ -14,10 +12,9 @@ RUN apt-get update && apt-get install -y \
 
 # Copy package files
 COPY package*.json ./
-COPY yarn.lock ./
 
 # Install dependencies
-RUN yarn install --frozen-lockfile
+RUN npm install
 
 # Copy source code
 COPY . .
@@ -25,12 +22,12 @@ COPY . .
 # Build TypeScript
 RUN yarn build
 
-# Expose the port that LangGraph will run on
+# Expose port
 EXPOSE 2024
 
-# Set environment variables
+# Set environment
 ENV NODE_ENV=production
 ENV PORT=2024
 
-# Start the LangGraph server
-CMD ["npx", "@langchain/langgraph-cli", "up", "--host", "0.0.0.0", "--port", "2024"]
+# Start LangGraph server
+CMD ["npx", "@langchain/langgraph-cli", "up"]
