@@ -1,6 +1,6 @@
 # Pdf QuizMuse
 
-A modern AI-powered PDF chatbot application that allows users to upload PDF documents, ask questions about their content, and generate interactive quizzes. Built with Next.js, LangGraph, and a beautiful minimalistic UI inspired by ChatGPT and Grok.
+A modern AI-powered PDF chatbot application that allows users to upload PDF documents, ask questions about their content, and generate interactive quizzes. Built with Next.js, LangGraph, and a minimalistic UI.
 
 🌐 **Live Demo**: [https://quizmuse.rushikesh.space/](https://quizmuse.rushikesh.space/)
 
@@ -13,7 +13,7 @@ A modern AI-powered PDF chatbot application that allows users to upload PDF docu
 - **🧠 Quiz Generation**: Create interactive quizzes from your document content
 - **🌙 Dark/Light Theme**: Toggle between beautiful light and dark modes
 - **📱 Responsive Design**: Works perfectly on desktop and mobile devices
-- **🎨 Modern UI**: Clean, minimalistic design inspired by ChatGPT and Grok
+- **🎨 Modern UI**: Clean, minimalistic design
 
 ## 🚀 Tech Stack
 
