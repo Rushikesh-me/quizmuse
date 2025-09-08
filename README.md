@@ -1,276 +1,274 @@
-# QuizMuse - AI-Powered PDF Quiz Generation and Document Chat
+# Pdf QuizMuse
 
-QuizMuse is an intelligent application that transforms your PDF documents into interactive quizzes and enables AI-powered document chat. Built with LangChain and LangGraph, it ingests PDF documents, stores embeddings in a vector database (Supabase), and generates quizzes while answering user queries using OpenAI.
+A modern AI-powered PDF chatbot application that allows users to upload PDF documents, ask questions about their content, and generate interactive quizzes. Built with Next.js, LangGraph, and a beautiful minimalistic UI inspired by ChatGPT and Grok.
 
-**Author:** Rushikesh Badgujar
+🌐 **Live Demo**: [https://quizmuse.rushikesh.space/](https://quizmuse.rushikesh.space/)
 
-**Here's what the Chatbot UI looks like:**
+![Pdf QuizMuse Screenshot](Screenshot%202025-09-08%20at%2012.20.45.png)
 
-<img width="1096" alt="Screenshot 2025-02-20 at 05 39 55" src="https://github.com/user-attachments/assets/3a9ddea7-b718-476b-bdae-38839be20c12" />
+## ✨ Features
 
-## Table of Contents
+- **📄 PDF Document Upload**: Drag and drop or click to upload multiple PDF files
+- **💬 Intelligent Chat**: Ask questions about your uploaded documents with AI-powered responses
+- **🧠 Quiz Generation**: Create interactive quizzes from your document content
+- **🌙 Dark/Light Theme**: Toggle between beautiful light and dark modes
+- **📱 Responsive Design**: Works perfectly on desktop and mobile devices
+- **🎨 Modern UI**: Clean, minimalistic design inspired by ChatGPT and Grok
 
-1. [Features](#features)
-2. [Architecture Overview](#architecture-overview)
-3. [Prerequisites](#prerequisites)
-4. [Installation](#installation)
-5. [Environment Variables](#environment-variables)
-   - [Frontend Variables](#frontend-variables)
-   - [Backend Variables](#backend-variables)
-6. [Local Development](#local-development)
-   - [Running the Backend](#running-the-backend)
-   - [Running the Frontend](#running-the-frontend)
-7. [Usage](#usage)
-   - [Uploading/Ingesting PDFs](#uploadingingesting-pdfs)
-   - [Asking Questions](#asking-questions)
-   - [Viewing Chat History](#viewing-chat-history)
-8. [Production Build & Deployment](#production-build--deployment)
-9. [Customizing the Agent](#customizing-the-agent)
-10. [Troubleshooting](#troubleshooting)
-11. [Next Steps](#next-steps)
-
----
-
-## Features
-
-- **Document Ingestion Graph**: Upload and parse PDFs into `Document` objects, then store vector embeddings into a vector database (we use Supabase in this example).
-- **Retrieval Graph**: Handle user questions, decide whether to retrieve documents or give a direct answer, then generate concise responses with references to the retrieved documents.
-- **Streaming Responses**: Real-time streaming of partial responses from the server to the client UI.
-- **LangGraph Integration**: Built using LangGraph’s state machine approach to orchestrate ingestion and retrieval, visualise your agentic workflow, and debug each step of the graph.  
-- **Next.js Frontend**: Allows file uploads, real-time chat, and easy extension with React components and Tailwind.
-
----
-
-## Architecture Overview
-
-```ascii
-┌─────────────────────┐    1. Upload PDFs    ┌───────────────────────────┐
-│Frontend (Next.js)   │ ────────────────────> │Backend (LangGraph)       │
-│ - React UI w/ chat  │                      │ - Ingestion Graph         │
-│ - Upload .pdf files │ <────────────────────┤   + Vector embedding via  │
-└─────────────────────┘    2. Confirmation   │     SupabaseVectorStore   │
-(storing embeddings in DB)
-
-┌─────────────────────┐    3. Ask questions  ┌───────────────────────────┐
-│Frontend (Next.js)   │ ────────────────────> │Backend (LangGraph)       │
-│ - Chat + SSE stream │                      │ - Retrieval Graph         │
-│ - Display sources   │ <────────────────────┤   + Chat model (OpenAI)   │
-└─────────────────────┘ 4. Streamed answers  └───────────────────────────┘
-
-```
-- **Supabase** is used as the vector store to store and retrieve relevant documents at query time.  
-- **OpenAI** (or other LLM providers) is used for language modeling.  
-- **LangGraph** orchestrates the "graph" steps for ingestion, routing, and generating responses.  
-- **Next.js** (React) powers the user interface for uploading PDFs and real-time chat.
-
-The system consists of:
-- **Backend**: A Node.js/TypeScript service that contains LangGraph agent "graphs" for:
-  - **Ingestion** (`src/ingestion_graph.ts`) - handles indexing/ingesting documents
-  - **Retrieval** (`src/retrieval_graph.ts`) - question-answering over the ingested documents
-  - **Configuration** (`src/shared/configuration.ts`) - handles configuration for the backend api including model providers and vector stores
-- **Frontend**: A Next.js/React app that provides a web UI for users to upload PDFs and chat with the AI.
----
-
-## Prerequisites
-
-1. **Node.js v18+** (we recommend Node v20).
-2. **Yarn** (or npm, but this monorepo is pre-configured with Yarn).
-3. **Supabase project** (if you plan to store embeddings in Supabase; see [Setting up Supabase](https://supabase.com/docs/guides/getting-started)).
-   - You will need:
-     - `SUPABASE_URL`
-     - `SUPABASE_SERVICE_ROLE_KEY`
-     - A table named `documents` and a function named `match_documents` for vector similarity search (see [LangChain documentation for guidance on setting up the tables](https://js.langchain.com/docs/integrations/vectorstores/supabase/)).
-4. **OpenAI API Key** (or another LLM provider’s key, supported by LangChain).
-5. **LangChain API Key** (free and optional, but highly recommended for debugging and tracing your LangChain and LangGraph applications). Learn more [here](https://docs.smith.langchain.com/administration/how_to_guides/organization_management/create_account_api_key)
-
----
-
-## Installation
-
-1. **Clone** the repository:
-
-   ```bash
-   git clone https://github.com/rushikeshbadgujar/quizmuse.git
-   cd quizmuse
-   ```
-
-2.	Install dependencies (from the monorepo root):
-
-yarn install
-
-	3.	Configure environment variables in both backend and frontend. See .`env.example` files for details.
-
-## Environment Variables
-
-The project relies on environment variables to configure keys and endpoints. Each sub-project (backend and frontend) has its own .env.example. Copy these to .env and fill in your details.
-
-### Frontend Variables
-
-Create a .env file in frontend:
-
-`cp frontend/.env.example frontend/.env`
-
-```
-    NEXT_PUBLIC_LANGGRAPH_API_URL=http://localhost:2024
-    LANGCHAIN_API_KEY=your-langsmith-api-key-here # Optional: LangSmith API key
-    LANGGRAPH_INGESTION_ASSISTANT_ID=ingestion_graph
-    LANGGRAPH_RETRIEVAL_ASSISTANT_ID=retrieval_graph
-
-    LANGCHAIN_TRACING_V2=true # Optional: Enable LangSmith tracing
-
-    LANGCHAIN_PROJECT="quizmuse" # Optional: LangSmith project name
-```
-
-### Backend Variables
-
-Create a .env file in backend:
-
-`cp backend/.env.example backend/.env`
-
-```
-    OPENAI_API_KEY=your-openai-api-key-here
-    SUPABASE_URL=your-supabase-url-here
-    SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key-here
-
-    LANGCHAIN_TRACING_V2=true # Optional: Enable LangSmith tracing
-
-    LANGCHAIN_PROJECT="quizmuse" # Optional: LangSmith project name
-```
-
-**Explanation of Environment Variables:**
-
--   `NEXT_PUBLIC_LANGGRAPH_API_URL`: The URL where your LangGraph backend server is running.  Defaults to `http://localhost:2024` for local development. 
--   `LANGCHAIN_API_KEY`: Your LangSmith API key.  This is optional, but highly recommended for debugging and tracing your LangChain and LangGraph applications.
--   `LANGGRAPH_INGESTION_ASSISTANT_ID`: The ID of the LangGraph assistant for document ingestion. Default is `ingestion_graph`.
--   `LANGGRAPH_RETRIEVAL_ASSISTANT_ID`: The ID of the LangGraph assistant for question answering. Default is `retrieval_graph`.
--   `LANGCHAIN_TRACING_V2`:  Enable tracing to debug your application on the LangSmith platform.  Set to `true` to enable.
--   `LANGCHAIN_PROJECT`:  The name of your LangSmith project.
--   `OPENAI_API_KEY`: Your OpenAI API key.
--   `SUPABASE_URL`: Your Supabase URL.
--   `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key.
-
-
-
-## Local Development
-
-This monorepo uses Turborepo to manage both backend and frontend projects. You can run them separately for development.
-
-### Running the Backend
-
-1.	Navigate to backend:
-
-```bash
-cd backend
-```
-
-2.	Install dependencies (already done if you ran yarn install at the root).
-
-3.	Start LangGraph in dev mode:
-
-```bash
-yarn langgraph:dev
-```
-
-This will launch a local LangGraph server on port 2024 by default. It should redirect you to a UI for interacting with the LangGraph server. [Langgraph studio guide](https://langchain-ai.github.io/langgraph/concepts/langgraph_studio/)
-
-### Running the Frontend
-
-1. Navigate to frontend:
-
-```bash
-cd frontend
-```
-
-2. Start the Next.js development server:
-
-```bash
-yarn dev
-```
-
-This will start a local Next.js development server (by default on port 3000).
-
-Access the UI in your browser at http://localhost:3000.
-
-## Usage
-
-Once both services are running:
-
-1. Use langgraph studio UI to interact with the LangGraph server and ensure the workflow is working as expected.
-
-2. Navigate to http://localhost:3000 to use the chatbot UI.
-
-3. Upload a small PDF document via the file upload button at the bottom of the page. This will trigger the ingestion graph to extract the text and store the embeddings in Supabase via the frontend `app/api/ingest` route.
-	
-4. After the ingestion is complete, ask questions in the chat input.
-
-5. The chatbot will trigger the retrieval graph via the `app/api/chat` route to retrieve the most relevant documents from the vector database and use the relevant PDF context (if needed) to answer.
-
-
-### Uploading/Ingesting PDFs
-
-Click on the paperclip icon in the chat input area.
-
-Select one or more PDF files to upload ensuring a total of max 5, each under 10MB (you can change these threshold values in the `app/api/ingest` route).
-
-The backend processes the PDFs, extracts text, and stores embeddings in Supabase (or your chosen vector store).
-
-### Asking Questions
-
-- Type your question in the chat input field.
-- Responses stream in real time. If the system retrieved documents, you’ll see a link to “View Sources” for each chunk of text used in the answer.
-
-### Viewing Chat History
-
-- The system creates a unique thread per user session (frontend). All messages are kept in the state for the session.
-- For demonstration purposes, the current example UI does not store the entire conversation beyond the local thread state and is not persistent across sessions. You can extend it to persist threads in a database. However, the "ingested documents" are persistent across sessions as they are stored in a vector database.
-
-
-## Deploying the Backend
-
-To deploy your LangGraph agent to a cloud service, you can either use LangGraph's cloud as per this [guide](https://langchain-ai.github.io/langgraph/cloud/quick_start/?h=studio#deploy-to-langgraph-cloud) or self-host it as per this [guide](https://langchain-ai.github.io/langgraph/how-tos/deploy-self-hosted/).
-
-## Deploying the Frontend
-The frontend can be deployed to any hosting that supports Next.js (Vercel, Netlify, etc.).
-
-Make sure to set relevant environment variables in your deployment environment. In particular, ensure `NEXT_PUBLIC_LANGGRAPH_API_URL` is pointing to your deployed backend URL.
-
-## Customizing the Agent
-
-You can customize the agent on the backend and frontend.
-
-### Backend
-
-- In the configuration file `src/shared/configuration.ts`, you can change the default configs i.e. the vector store, k-value, and filter kwargs, shared between the ingestion and retrieval graphs. On the backend, configs can be used in each node of the graph workflow or from frontend, you can pass a config object into the graph's client.
-- You can adjust the prompts in the `src/retrieval_graph/prompts.ts` file.
-- If you'd like to change the retrieval model, you can do so in the `src/shared/retrieval.ts` file by adding another retriever function that encapsulates the desired client for the vector store and then updating the `makeRetriever` function to return the new retriever.
-
+## 🚀 Tech Stack
 
 ### Frontend
+- **Next.js 14** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first CSS framework
+- **Radix UI** - Accessible component primitives
+- **Lucide React** - Beautiful icons
+- **Jest** - Testing framework
 
-- You can modify the file upload restrictions in the `app/api/ingest` route.
-- In `constants/graphConfigs.ts`, you can change the default config objects sent to the ingestion and retrieval graphs. These include the model provider, k value (no of source documents to retrieve), and retriever provider (i.e. vector store).
+### Backend
+- **LangGraph** - AI workflow orchestration
+- **LangChain** - LLM application framework
+- **OpenAI** - Large language model integration
+- **Supabase** - Vector database for embeddings
+- **TypeScript** - Type-safe backend development
 
+## 🛠️ Installation
 
-## Troubleshooting
-1. .env Not Loaded
-   - Make sure you copied .env.example to .env in both backend and frontend.
-   - Check your environment variables are correct and restart the dev server.
+> **🚀 Try it now**: [https://quizmuse.rushikesh.space/](https://quizmuse.rushikesh.space/) - No installation required!
 
-2. Supabase Vector Store
-   - Ensure you have configured your Supabase instance with the documents table and match_documents function. Check the official LangChain docs on Supabase integration.
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- OpenAI API key
 
-3. OpenAI Errors
-   - Double-check your OPENAI_API_KEY. Make sure you have enough credits/quota.
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd pdf-chatbot
+```
 
-4. LangGraph Not Running
-   - If yarn langgraph:dev fails, confirm your Node version is >= 18 and that you have all dependencies installed.
+### 2. Install Dependencies
 
-5. Network Errors
-   - Frontend must point to the correct NEXT_PUBLIC_LANGGRAPH_API_URL. By default, it is http://localhost:2024.
+#### Backend
+```bash
+cd backend
+npm install
+```
 
-## Next Steps
+#### Frontend
+```bash
+cd frontend
+npm install
+```
 
-If you'd like to contribute to this project, feel free to open a pull request. Ensure it is well documented and includes tests in the test files.
+### 3. Environment Setup
 
-If you'd like to learn more about building AI chatbots and agents with LangChain and LangGraph, check out the book [Learning LangChain (O'Reilly)](https://www.oreilly.com/library/view/learning-langchain/9781098167271/). QuizMuse is inspired by the concepts and examples from this comprehensive guide.
+#### Backend Environment
+Create `backend/.env` file:
+```bash
+cp backend/.env.example backend/.env
+```
 
+#### Frontend Environment
+Create `frontend/.env.local` file:
+```bash
+cp frontend/.env.example frontend/.env.local
+```
+
+### 4. Configure Environment Variables
+
+Edit the environment files with your actual values:
+
+**Backend (.env):**
+- `OPENAI_API_KEY` - Your OpenAI API key
+- `LANGGRAPH_API_KEY` - LangGraph API key (if using cloud)
+- `CHROMA_PERSIST_DIRECTORY` - Directory for ChromaDB persistence
+- `PORT` - Backend server port (default: 2024)
+
+**Frontend (.env.local):**
+- `NEXT_PUBLIC_LANGGRAPH_URL` - Backend API URL
+- `NEXT_PUBLIC_APP_NAME` - Application name
+
+## 🚀 Running the Application
+
+### Development Mode
+
+1. **Start the Backend:**
+```bash
+cd backend
+npm run langgraph:dev
+```
+
+2. **Start the Frontend:**
+```bash
+cd frontend
+npm run dev
+```
+
+3. **Access the Application:**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:2024
+
+### Production Mode
+
+1. **Build the Frontend:**
+```bash
+cd frontend
+npm run build
+npm start
+```
+
+2. **Start the Backend:**
+```bash
+cd backend
+npm run start
+```
+
+## 📖 Usage
+
+### Uploading Documents
+1. Click the upload area or drag and drop PDF files
+2. Wait for the documents to be processed and indexed
+3. View uploaded files in the sidebar
+
+### Chatting with Documents
+1. Navigate to the Chat section
+2. Ask questions about your uploaded documents
+3. Get AI-powered responses with source references
+
+### Generating Quizzes
+1. Go to the Quiz section
+2. Select specific document sections (optional)
+3. Click "Generate Quiz" to create interactive questions
+4. Answer questions and track your progress
+
+### Navigation
+- Use the sidebar to switch between Chat and Quiz modes
+- Browse the Table of Contents to jump to specific sections
+- Toggle between light and dark themes using the theme button
+
+## 🧪 Testing
+
+### Frontend Tests
+```bash
+cd frontend
+npm test
+```
+
+### Backend Tests
+```bash
+cd backend
+npm test
+```
+
+### Integration Tests
+```bash
+cd backend
+npm run test:int
+```
+
+## 🎨 Customization
+
+### Color Theme
+The application uses a custom color palette inspired by ChatGPT and Grok:
+- **Rich Black**: `#0d1b2a`
+- **Oxford Blue**: `#1b263b`
+- **Yinmn Blue**: `#415a77`
+- **Silver Lake Blue**: `#778da9`
+- **Platinum**: `#f9f9f8`
+
+Colors can be customized in `frontend/app/globals.css`.
+
+### Styling
+The application uses Tailwind CSS with custom CSS variables. All styling is done through Tailwind utility classes for consistency and maintainability.
+
+## 📁 Project Structure
+
+```
+pdf-chatbot/
+├── frontend/                 # Next.js frontend application
+│   ├── app/                 # App Router pages and layouts
+│   ├── components/          # Reusable React components
+│   ├── lib/                 # Utility functions and configurations
+│   ├── types/               # TypeScript type definitions
+│   └── styles/              # Global styles and Tailwind config
+├── backend/                 # LangGraph backend application
+│   ├── src/                 # Source code
+│   │   ├── ingestion_graph/ # Document processing workflow
+│   │   ├── retrieval_graph/ # Document retrieval workflow
+│   │   ├── quiz_graph/      # Quiz generation workflow
+│   │   ├── toc_graph/       # Table of contents generation
+│   │   └── shared/          # Shared utilities and services
+│   └── test_docs/           # Sample PDF documents for testing
+└── scripts/                 # Build and deployment scripts
+```
+
+## 🔧 API Endpoints
+
+### Frontend API Routes
+- `POST /api/chat` - Send chat messages
+- `POST /api/ingest` - Upload and process documents
+- `POST /api/quiz` - Generate quizzes
+- `GET /api/toc` - Get table of contents
+- `POST /api/cleanup` - Clean up resources
+
+### Backend LangGraph Endpoints
+- `POST /threads` - Create new conversation threads
+- `POST /threads/{thread_id}/runs` - Execute workflows
+- `GET /threads/{thread_id}/runs/{run_id}/stream` - Stream responses
+
+## 🚀 Deployment
+
+### Using Render (Recommended)
+1. Connect your GitHub repository to Render
+2. Set up environment variables in Render dashboard
+3. Deploy both frontend and backend services
+
+### Using Docker
+```bash
+# Build and run with Docker Compose
+docker-compose up --build
+```
+
+### Manual Deployment
+1. Build the frontend: `npm run build`
+2. Start the backend: `npm run start`
+3. Configure reverse proxy (nginx/Apache)
+4. Set up SSL certificates
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Commit changes: `git commit -m 'Add feature'`
+4. Push to branch: `git push origin feature-name`
+5. Submit a pull request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👨‍💻 Author
+
+**Rushikesh Badgujar**
+- GitHub: [@rushikesh-badgujar](https://github.com/rushikesh-badgujar)
+- Email: [your-email@example.com]
+
+## 🙏 Acknowledgments
+
+- OpenAI for providing the language models
+- LangChain team for the excellent AI framework
+- Next.js team for the amazing React framework
+- Radix UI for accessible component primitives
+- Tailwind CSS for the utility-first CSS framework
+
+## 📞 Support
+
+If you encounter any issues or have questions:
+1. Check the [Issues](https://github.com/your-repo/issues) page
+2. Create a new issue with detailed information
+3. Contact the maintainer
+
+---
+
+**Happy Document Chatting! 📚✨**
